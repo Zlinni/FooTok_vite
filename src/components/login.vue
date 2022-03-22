@@ -24,19 +24,19 @@
               id="login-username"
               placeholder="用户ID"
               maxlength="12"
-              v-model="userName"
+              v-model="username"
               autocomplete
             />
           </div>
           <div class="passwordBox">
-            <img :src="password" alt="" />
+            <img :src="keyimg" alt="" />
             <input
               type="password"
               name="password"
               id="login-password"
               placeholder="密码"
               maxlength="12"
-              v-model="passWord"
+              v-model="password"
               autocomplete
             />
           </div>
@@ -51,27 +51,27 @@
               id="login-username"
               placeholder="用户ID"
               maxlength="12"
-              v-model="userName"
+              v-model="username"
             />
             <i class="iconfont icon-chenggong" v-show="userNameSuccess"></i>
             <p class="tips">{{ userNameTips }}</p>
           </div>
           <div class="passwordBox">
-            <img :src="password" alt="" />
+            <img :src="keyimg" alt="" />
             <input
               type="password"
               name="password"
               id="login-password"
               placeholder="密码"
               maxlength="12"
-              v-model="passWord"
+              v-model="password"
               @keydown="showcommitpsw = true"
             />
             <i class="iconfont icon-chenggong" v-show="passWordSuccess"></i>
             <p class="tips">{{ passwordTips }}</p>
           </div>
           <div class="passwordBox" v-if="showcommitpsw">
-            <img :src="password" alt="" />
+            <img :src="keyimg" alt="" />
             <input
               type="password"
               name="comitpassword"
@@ -91,10 +91,9 @@
 </template>
 
 <script>
-import { ref, reactive, toRefs, watch } from "vue";
+import { ref, reactive, toRefs, toRaw, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import axios from "axios";
-import qs from 'Qs'
 import getAssetsImages from "../hook/getAssetsImages";
 
 export default {
@@ -102,11 +101,11 @@ export default {
     let imgUrl = reactive({
       logo: getAssetsImages("login", "斜眼看.png"),
       account: getAssetsImages("login", "用户登录icon.png"),
-      password: getAssetsImages("login", "密码icon.png"),
+      keyimg: getAssetsImages("login", "密码icon.png"),
     });
     let userData = reactive({
-      userName: "",
-      passWord: "",
+      username: "",
+      password: "",
     });
     let isLogin = ref(true);
     let commitpsw = ref("");
@@ -122,7 +121,7 @@ export default {
     const route = useRoute();
     const router = useRouter();
     watch(
-      () => userData.userName,
+      () => userData.username,
       (newValue) => {
         let patt = /^[a-zA-Z0-9_-]{4,16}$/;
         if (!patt.test(newValue)) {
@@ -135,7 +134,7 @@ export default {
       }
     );
     watch(
-      () => userData.passWord,
+      () => userData.password,
       (newValue) => {
         let patt = /^.*(?=.{6,})(?=.*\d)(?=.*[A-Z])(?=.*[a-z]).*$/;
         if (!patt.test(newValue)) {
@@ -156,10 +155,6 @@ export default {
         commitpswTips.value = "您的密码不匹配";
       }
     });
-    let JsonUserData = {
-      username: userData.userName,
-      password: userData.passWord,
-    };
     //注册
     var userRegister = (e) => {
       if (
@@ -167,16 +162,19 @@ export default {
         isSuccess.passWordSuccess &&
         isSuccess.commitpswSuccess
       ) {
+        let rawData = toRaw(userData);
         axios
-          .post("http://localhost:3000/api/login", qs.stringify({JsonUserData}))
+          .post("http://localhost:3000/api/register", rawData)
           .then((res) => {
-            if (res.code === 200) {
-              if (res.msg === "success") {
+            if (res.data.code === 200) {
+              if (res.data.msg === "success") {
                 // 进入页面
                 sessionStorage.setItem("sid", true);
                 router.push({ name: "index" });
-              } else if (res.msg === "nameExist") {
+              } else {
                 // 用户名已存在
+                userNameTips.value = "用户名已存在";
+                isSuccess.userNameSuccess = false;
               }
             }
           })
@@ -185,10 +183,10 @@ export default {
           });
       } else {
         e.preventDefault();
-        if (!userData.userName) {
+        if (!userData.username) {
           userNameTips.value = "用户名不能为空";
         }
-        if (!userData.passWord) {
+        if (!userData.password) {
           passwordTips.value = "密码不能为空";
         }
       }
@@ -196,19 +194,14 @@ export default {
 
     //登陆
     var userLogin = () => {
+      let rawData = toRaw(userData);
+      console.log(rawData)
       axios
-        .post("http://localhost:3000/api/login", qs.stringify({JsonUserData}))
+        .post("http://localhost:3000/api/login", rawData)
         .then((res) => {
-          if (res.code === 200) {
-            if (res.msg === "success") {
-              // 进入页面
-              sessionStorage.setItem("sid", true);
-              router.push({ name: "index" });
-            } else if (res.msg === "nameNotExist") {
-              // 用户不存在
-            } else {
-              // 密码错误
-            }
+          if (res.data.code === 200) {
+            sessionStorage.setItem("sid", true);
+            router.push({ name: "index" });
           } else {
             console.log("登陆失败，密码错误");
           }
