@@ -24,6 +24,7 @@
               id="login-username"
               placeholder="用户ID"
               maxlength="12"
+              v-model="userName"
               autocomplete
             />
           </div>
@@ -35,10 +36,11 @@
               id="login-password"
               placeholder="密码"
               maxlength="12"
+              v-model="passWord"
               autocomplete
             />
           </div>
-          <button id="submit" @click="enter">进入</button>
+          <button id="submit" @click="userLogin">进入</button>
         </div>
         <div class="registerForm" v-else>
           <div class="usernameBox">
@@ -81,7 +83,7 @@
             <i class="iconfont icon-chenggong" v-show="commitpswSuccess"></i>
             <p class="tips">{{ commitpswTips }}</p>
           </div>
-          <button id="submit" @click.native="checkAll">进入</button>
+          <button id="submit" @click.native="userRegister">进入</button>
         </div>
       </div>
     </div>
@@ -90,8 +92,9 @@
 
 <script>
 import { ref, reactive, toRefs, watch } from "vue";
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute, useRouter } from "vue-router";
 import axios from "axios";
+import qs from 'Qs'
 import getAssetsImages from "../hook/getAssetsImages";
 
 export default {
@@ -116,8 +119,8 @@ export default {
       passWordSuccess: false,
       commitpswSuccess: false,
     });
-    const route = useRoute()
-    const router = useRouter()
+    const route = useRoute();
+    const router = useRouter();
     watch(
       () => userData.userName,
       (newValue) => {
@@ -153,23 +156,33 @@ export default {
         commitpswTips.value = "您的密码不匹配";
       }
     });
-    var checkAll = (e) => {
-      console.log("1", isSuccess.userNameSuccess);
-      console.log("2", isSuccess.passWordSuccess);
-      console.log("3", isSuccess.commitpswSuccess);
+    let JsonUserData = {
+      username: userData.userName,
+      password: userData.passWord,
+    };
+    //注册
+    var userRegister = (e) => {
       if (
         isSuccess.userNameSuccess &&
         isSuccess.passWordSuccess &&
         isSuccess.commitpswSuccess
       ) {
-        axios.post(`/api1`, JSON.stringify(userData)).then((res) => {
-          if(res.code === 200){
-            console.log('success')
-          }else{
-            console.log('fail')
-          }
-          console.log(res);
-        });
+        axios
+          .post("http://localhost:3000/api/login", qs.stringify({JsonUserData}))
+          .then((res) => {
+            if (res.code === 200) {
+              if (res.msg === "success") {
+                // 进入页面
+                sessionStorage.setItem("sid", true);
+                router.push({ name: "index" });
+              } else if (res.msg === "nameExist") {
+                // 用户名已存在
+              }
+            }
+          })
+          .catch((err) => {
+            console.log(err);
+          });
       } else {
         e.preventDefault();
         if (!userData.userName) {
@@ -180,19 +193,30 @@ export default {
         }
       }
     };
-    var enter = ()=>{
-      axios.post('http://localhost:3000/api/login', JSON.stringify(userData)).then((res) => {
-        if(res.code === 200){
-          console.log('登陆成功');
-          // 进入页面
-          router.push({name:'index'});
-        }else{
-          console.log('登陆失败，密码错误');
-          // 用户不存在
-          // 密码错误
-        }
-      })
-    }
+
+    //登陆
+    var userLogin = () => {
+      axios
+        .post("http://localhost:3000/api/login", qs.stringify({JsonUserData}))
+        .then((res) => {
+          if (res.code === 200) {
+            if (res.msg === "success") {
+              // 进入页面
+              sessionStorage.setItem("sid", true);
+              router.push({ name: "index" });
+            } else if (res.msg === "nameNotExist") {
+              // 用户不存在
+            } else {
+              // 密码错误
+            }
+          } else {
+            console.log("登陆失败，密码错误");
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    };
     return {
       isLogin,
       userNameTips,
@@ -200,8 +224,8 @@ export default {
       commitpswTips,
       commitpsw,
       showcommitpsw,
-      checkAll,
-      enter,
+      userRegister,
+      userLogin,
       ...toRefs(imgUrl),
       ...toRefs(isSuccess),
       ...toRefs(userData),
@@ -274,7 +298,7 @@ export default {
         margin: 35px 0px 0px;
         margin-left: 70px;
         line-height: 45px;
-        text-align: center;
+        text-align: cuserLogin;
         p {
           font-size: 32px;
           cursor: pointer;

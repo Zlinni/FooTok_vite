@@ -1,5 +1,5 @@
 <template>
-  <el-carousel>
+  <el-carousel arrow="never" >
     <el-carousel-item v-for="item in imgUrl" :key="item">
       <img :src="item.slider" alt="" />
     </el-carousel-item>
@@ -34,10 +34,6 @@ export default {
         }
       }
       btnText();
-      function isActive(){
-          let active = document.getElementsByClassName('is-active');
-          
-      }
     });
     return {
       imgUrl,
@@ -80,6 +76,9 @@ export default {
         font-weight: 700;
         color: var(--swiperText-color);
     }
+  }
+  .is-active{
+      background-color: red !important;
   }
 }
 </style>
