@@ -1,5 +1,5 @@
 <template>
-  <el-aside class="pre_box" width="9%">
+  <el-aside class="pre_box" >
     <template v-if="isLeft">
       <div v-for="(n, index) in nav" :key="index" class="nav">
         <router-link :to="n.link">{{ n.text }}</router-link
@@ -63,6 +63,7 @@ export default {
 <style lang='less' scoped>
 .pre_box {
   margin-left: 0;
+  width: 9%;
   height: 100%;
   background: var(--asideBg-color);
   overflow: visible;
@@ -71,7 +72,8 @@ export default {
     position: relative;
     z-index: 999;
     display: flex;
-    height: 20%;
+    width: 100%;
+    height: 9vw;
     border-radius: 70px;
     background-color: var(--asideBg-color);
     a {
@@ -84,6 +86,9 @@ export default {
       overflow: hidden;
       font-size: 50px;
       white-space: nowrap;
+    }
+    img{
+      width: 100%;
     }
   }
   @keyframes widthMove {

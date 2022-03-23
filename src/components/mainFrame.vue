@@ -182,7 +182,8 @@ export default {
       }
     }
     .el-container {
-      margin-top: 6%;
+      position: relative;
+      top: 12%;
       height: 90%;
       .el-main{
         padding-top: 0;

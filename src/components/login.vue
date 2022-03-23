@@ -190,7 +190,6 @@ export default {
     //登陆
     var userLogin = () => {
       let rawData = toRaw(userData);
-      console.log(rawData);
       axios
         .post("http://localhost:3000/api/login", rawData)
         .then((res) => {
@@ -198,7 +197,7 @@ export default {
             sessionStorage.setItem("sid", true);
             router.push({ name: "index" });
           } else {
-            console.log("登陆失败，密码错误");
+            passwordTips.value = "登陆失败，密码错误"
           }
         })
         .catch((err) => {

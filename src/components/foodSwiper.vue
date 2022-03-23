@@ -1,23 +1,30 @@
 <template>
-  <el-carousel arrow="never">
+  <el-carousel arrow="never" :autoplay="false">
     <div class="pagin">
       <span><a id="change">换一些</a></span>
     </div>
-    <el-carousel-item v-for="item in imgUrl" :key="item">
-      <img :src="item.slider" alt="" />
+    <el-carousel-item v-for="item in foodMsg" :key="item">
+      <img :src="item.foodbigimg" alt="" />
       <div class="cover">
-        <span id="food_name" class="food_name">黄焖鸡</span>
-        <span id="introbox">
-          <p id="food_intro" class="food_intro"></p>
-        </span>
-      </div>
-      <div class="thumb_box">
-        <div class="thumb">
-          <div class="demo"></div>
-          <img src="./img/index/点赞.png" alt="" id="zan" class="zan" />
+        <div class="foodbox">
+          <span id="food_name" class="food_name">{{ item.foodname }}</span>
+          <div class="thumb">
+            <div class="zanbox">
+              <img
+                src="../assets/img/index/点赞带框.png"
+                alt=""
+                id="zan"
+                class="zan"
+              />
+              <p class="countthumb">{{ item.likenum }}</p>
+            </div>
+            <div class="heartbox">
+              <img src="../assets/img/index/喜欢-空白.png" alt="" id="heart" />
+            </div>
+          </div>
         </div>
-        <span class="word_countthumb">
-          <p id="countthumb" class="countthumb"></p>
+        <span id="introbox">
+          <p id="food_intro" class="food_intro">{{ item.introduce }}</p>
         </span>
       </div>
     </el-carousel-item>
@@ -25,18 +32,13 @@
 </template>
 
 <script>
-import { nextTick, reactive, toRefs } from "vue";
+import { nextTick, onMounted, reactive, toRefs } from "vue";
+import axios from 'axios';
 import getAssetsImages from "../hook/getAssetsImages";
 
 export default {
   setup() {
-    let imgUrl = [
-      { slider: getAssetsImages("slide", "1.jpg") },
-      { slider: getAssetsImages("slide", "2.png") },
-      { slider: getAssetsImages("slide", "3.jpg") },
-      { slider: getAssetsImages("slide", "4.jpg") },
-      { slider: getAssetsImages("slide", "5.jpg") },
-    ];
+    let foodMsg = reactive([]);
     nextTick(() => {
       function btnText() {
         let wordObj = {
@@ -53,8 +55,19 @@ export default {
       }
       btnText();
     });
+    //isCollect
+    onMounted(()=>{
+      axios.post('/api/swiper').then((res)=>{
+        if(res.data.code ===200){
+          foodMsg = res.data.records;
+          console.log(foodMsg);
+        }
+      }).catch((err)=>{
+        console.log(err);
+      })
+    })
     return {
-      imgUrl,
+      foodMsg,
     };
   },
 };
@@ -66,58 +79,6 @@ export default {
   height: 100%;
   .el-carousel__container {
     height: 100% !important;
-    img {
-      width: 100%;
-      height: 100%;
-    }
-    .cover {
-      position: absolute;
-      left: 0;
-      bottom: 0;
-      transform: translate(20%, -60%);
-      z-index: 10;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      flex-direction: column;
-      width: 36%;
-      height: 22%;
-      .heart {
-        position: relative;
-        top: 24%;
-        float: left;
-        width: 9%;
-      }
-      #collectionimg {
-        width: 100%;
-      }
-      #food_name {
-        padding: 9px;
-        margin: 9px;
-        font-size: 75px;
-        letter-spacing: 10px;
-        line-height: 72px;
-        color: #fff;
-        background: rgba(0, 0, 0, 0.6);
-        border-radius: 10px;
-        cursor: default;
-      }
-      #introbox {
-        width: 100%;
-        height: 125px;
-        padding: 5px;
-        margin: 9px;
-        color: #f1f2f6;
-        background: rgba(0, 0, 0, 0.6);
-        border-radius: 10px;
-        text-decoration: underline;
-        cursor: default;
-        overflow: hidden;
-        #food_intro {
-          font-size: 23px;
-        }
-      }
-    }
     .pagin {
       position: absolute;
       right: 0;
@@ -137,12 +98,90 @@ export default {
         cursor: pointer;
       }
     }
+    img {
+      width: 100%;
+      height: 100%;
+    }
+    .cover {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      transform: translate(-153%, -45%);
+      z-index: 10;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      flex-direction: column;
+      width: 36%;
+      .foodbox {
+        display: flex;
+        width: 100%;
+        #food_name {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          width: 380px;
+          padding: 9px;
+          font-size: 75px;
+          letter-spacing: 10px;
+          line-height: 72px;
+          color: #fff;
+          background: rgba(0, 0, 0, 0.6);
+          border-radius: 10px;
+          cursor: default;
+          white-space: nowrap;
+        }
+        .thumb {
+          position: relative;
+          width: 45%;
+          display: flex;
+          align-self: end;
+          margin-left: 2%;
+          .zanbox {
+            position: relative;
+            width: 45%;
+            #zan {
+              width: 100%;
+            }
+            .countthumb {
+              position: absolute;
+              left: 50%;
+              top: 50%;
+              transform: translate(-15%, -50%);
+              font-size: 20px;
+            }
+          }
+          .heartbox {
+            width: 20%;
+            margin-left: 2%;
+            #heart {
+              width: 100%;
+            }
+          }
+        }
+      }
+      #introbox {
+        width: 100%;
+        height: 125px;
+        padding: 5px;
+        margin-top: 9px;
+        color: #f1f2f6;
+        background: rgba(0, 0, 0, 0.6);
+        border-radius: 10px;
+        text-decoration: underline;
+        cursor: default;
+        overflow: hidden;
+        #food_intro {
+          font-size: 23px;
+        }
+      }
+    }
   }
   .el-carousel__indicators--horizontal {
     left: unset !important;
     bottom: 0 !important;
     right: 0 !important;
-    transform: translate(-63%,-495%);
+    transform: translate(-63%, -495%);
   }
   li.el-carousel__indicator.el-carousel__indicator--horizontal {
     width: 40px;
