@@ -147,7 +147,7 @@ export default {
       }
     );
     watch(commitpsw, (newValue) => {
-      if (newValue === userData.passWord && isSuccess.passWordSuccess) {
+      if (newValue === userData.password && isSuccess.passWordSuccess) {
         isSuccess.commitpswSuccess = true;
         commitpswTips.value = "";
       } else {
@@ -208,6 +208,7 @@ export default {
         })
         .catch((err) => {
           console.log(err);
+          userNameTips.value = '该用户不存在';
         });
     };
     return {
@@ -291,7 +292,7 @@ export default {
         margin: 35px 0px 0px;
         margin-left: 70px;
         line-height: 45px;
-        text-align: cuserLogin;
+        text-align: center;
         p {
           font-size: 32px;
           cursor: pointer;
