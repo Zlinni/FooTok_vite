@@ -78,7 +78,7 @@ export default {
       z-index: 10;
       display: flex;
       justify-content: center;
-      align-items: center;
+      align-items: flex-start;
       flex-direction: column;
       width: 36%;
       height: 22%;
@@ -138,7 +138,8 @@ export default {
       }
     }
   }
-  ul.el-carousel__indicators.el-carousel__indicators--horizontal {
+  .el-carousel__indicators--horizontal {
+    left: unset !important;
     bottom: 0 !important;
     right: 0 !important;
     transform: translate(-63%,-495%);

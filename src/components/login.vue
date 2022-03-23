@@ -167,19 +167,14 @@ export default {
           .post("http://localhost:3000/api/register", rawData)
           .then((res) => {
             if (res.data.code === 200) {
-              if (res.data.msg === "success") {
-                // 进入页面
-                sessionStorage.setItem("sid", true);
-                router.push({ name: "index" });
-              } else {
-                // 用户名已存在
-                userNameTips.value = "用户名已存在";
-                isSuccess.userNameSuccess = false;
-              }
+              sessionStorage.setItem("sid", true);
+              router.push({ name: "index" });
             }
           })
           .catch((err) => {
-            console.log(err);
+            userNameTips.value = "用户名已存在";
+            isSuccess.userNameSuccess = false;
+            console.log(err)
           });
       } else {
         e.preventDefault();
@@ -195,7 +190,7 @@ export default {
     //登陆
     var userLogin = () => {
       let rawData = toRaw(userData);
-      console.log(rawData)
+      console.log(rawData);
       axios
         .post("http://localhost:3000/api/login", rawData)
         .then((res) => {
@@ -208,7 +203,7 @@ export default {
         })
         .catch((err) => {
           console.log(err);
-          userNameTips.value = '该用户不存在';
+          userNameTips.value = "该用户不存在";
         });
     };
     return {
