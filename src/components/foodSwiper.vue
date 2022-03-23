@@ -1,7 +1,7 @@
 <template>
   <el-carousel arrow="never" :autoplay="false">
     <div class="pagin">
-      <span><a id="change">换一些</a></span>
+      <span><button id="change" @click="getfood">换一些</button></span>
     </div>
     <el-carousel-item v-for="item in foodMsg" :key="item">
       <img :src="item.foodbigimg" alt="" />
@@ -33,12 +33,12 @@
 
 <script>
 import { nextTick, onMounted, reactive, toRefs } from "vue";
-import axios from 'axios';
-import getAssetsImages from "../hook/getAssetsImages";
-
+import axiosFoodMsg from '../hook/axiosFoodMsg'
 export default {
   setup() {
-    let foodMsg = reactive([]);
+    let foodMsgObj = reactive({
+      foodMsg
+    });
     nextTick(() => {
       function btnText() {
         let wordObj = {
@@ -55,19 +55,16 @@ export default {
       }
       btnText();
     });
+    var getfood = function(){
+      foodMsgObj.foodMsg = axiosFoodMsg();
+    }
     //isCollect
     onMounted(()=>{
-      axios.post('/api/swiper').then((res)=>{
-        if(res.data.code ===200){
-          foodMsg = res.data.records;
-          console.log(foodMsg);
-        }
-      }).catch((err)=>{
-        console.log(err);
-      })
+      getfood();
     })
     return {
-      foodMsg,
+      ...toRefs(foodMsgObj),
+      getfood
     };
   },
 };
