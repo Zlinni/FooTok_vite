@@ -201,7 +201,7 @@ export default {
           }
         })
         .catch((err) => {
-          console.log(err);
+          console.log("用户不存在");
           userNameTips.value = "该用户不存在";
         });
     };
