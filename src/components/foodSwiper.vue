@@ -1,25 +1,25 @@
 <template>
-  <el-carousel arrow="never" :pause-on-hover="false" v-if="foodMsg.length">
+  <el-carousel arrow="never" :pause-on-hover="true" v-if="foodMsg.length">
     <div class="pagin">
       <span><a id="change" @click="getfood">换一些</a></span>
     </div>
     <el-carousel-item v-for="item in foodMsg" :key="item">
-      <img :src="item.foodbigimg" alt=""/>
+      <img :src="item.foodbigimg" alt="" />
       <div class="cover">
         <div class="foodbox">
           <span id="food_name" class="food_name">{{ item.foodname }}</span>
           <div class="thumb">
             <div class="zanbox">
               <img
-                  src="../assets/img/index/点赞带框.png"
-                  alt=""
-                  id="zan"
-                  class="zan"
+                src="../assets/img/index/点赞带框.png"
+                alt=""
+                id="zan"
+                class="zan"
               />
               <p class="countthumb">{{ item.likenum }}</p>
             </div>
             <div class="heartbox">
-              <img src="../assets/img/index/喜欢-空白.png" alt="" id="heart"/>
+              <img src="../assets/img/index/喜欢-空白.png" alt="" id="heart" />
             </div>
           </div>
         </div>
@@ -32,41 +32,38 @@
 </template>
 
 <script>
-import {nextTick, onMounted, reactive, toRefs} from "vue";
-import axiosFoodMsg from '../hook/axiosFoodMsg'
+import { nextTick, onMounted, reactive, toRefs } from "vue";
+import axiosFoodMsg from "../hook/axiosFoodMsg";
 
 export default {
   setup() {
     let foodMsgObj = reactive({
-      foodMsg: []
+      foodMsg: [],
     });
+    let wordObj = {
+      0: "壹",
+      1: "贰",
+      2: "叁",
+      3: "肆",
+      4: "伍",
+    };
     var getfood = () => {
+      foodMsgObj.foodMsg = [];
       axiosFoodMsg().then((res) => {
         foodMsgObj.foodMsg = res;
-      })
-    };
-    getfood()
-
-    function btnText() {
-      let wordObj = {
-        0: "壹",
-        1: "贰",
-        2: "叁",
-        3: "肆",
-        4: "伍",
-      };
+      });
       let btn = document.getElementsByClassName("el-carousel__button");
       setTimeout(() => {
         for (let i = 0; i < btn.length; i++) {
           btn[i].innerText = wordObj[i];
         }
-      }, 10)
-    }
+      }, 100);
+    };
+    getfood();
 
-    btnText();
     return {
       ...toRefs(foodMsgObj),
-      getfood
+      getfood,
     };
   },
 };
@@ -76,10 +73,8 @@ export default {
 .el-carousel {
   width: 100%;
   height: 100%;
-
   .el-carousel__container {
     height: 100% !important;
-
     .pagin {
       position: absolute;
       right: 0;
@@ -92,7 +87,6 @@ export default {
       height: 90px;
       background: url(../assets/img/index/换一些框.png) no-repeat;
       background-size: cover;
-
       span a {
         font-size: 48px;
         line-height: 90px;
@@ -100,12 +94,10 @@ export default {
         cursor: pointer;
       }
     }
-
     img {
       width: 100%;
       height: 100%;
     }
-
     .cover {
       position: absolute;
       right: 0;
@@ -117,11 +109,9 @@ export default {
       align-items: flex-start;
       flex-direction: column;
       width: 36%;
-
       .foodbox {
         display: flex;
         width: 100%;
-
         #food_name {
           display: flex;
           justify-content: center;
@@ -137,22 +127,19 @@ export default {
           cursor: default;
           white-space: nowrap;
         }
-
         .thumb {
-          position: relative;
+          position: absolute;
           width: 45%;
+          left: 68%;
           display: flex;
           align-self: end;
           margin-left: 2%;
-
           .zanbox {
             position: relative;
             width: 45%;
-
             #zan {
               width: 100%;
             }
-
             .countthumb {
               position: absolute;
               left: 50%;
@@ -161,11 +148,9 @@ export default {
               font-size: 20px;
             }
           }
-
           .heartbox {
             width: 20%;
             margin-left: 2%;
-
             #heart {
               width: 100%;
             }
@@ -184,8 +169,12 @@ export default {
         text-decoration: underline;
         cursor: default;
         overflow: hidden;
-
         #food_intro {
+          text-overflow: ellipsis;
+          display: -webkit-box;
+          -webkit-line-clamp: 4; /* 限制在一个块元素显示的文本的行数 */
+          -webkit-box-orient: vertical; /* 垂直排列 */
+          word-break: break-all; /* 内容自动换行 */
           font-size: 23px;
         }
       }
