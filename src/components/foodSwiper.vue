@@ -3,23 +3,25 @@
     <div class="pagin">
       <span><a id="change" @click="getfood">换一些</a></span>
     </div>
-    <el-carousel-item v-for="item in foodMsg" :key="item">
-      <img :src="item.foodbigimg" alt="" />
+    <el-carousel-item v-for="item in foodMsg" :key="item.id">
+      <img v-lazy="item.foodbigimg" alt="" />
       <div class="cover">
         <div class="foodbox">
           <span id="food_name" class="food_name">{{ item.foodname }}</span>
           <div class="thumb">
-            <div class="zanbox">
+            <div class="zanbox" @click.stop="zan(item.id)">
               <img
                 src="../assets/img/index/点赞带框.png"
                 alt=""
                 id="zan"
                 class="zan"
               />
-              <p class="countthumb">{{ item.likenum }}</p>
+              <p class="countthumb">
+                {{ item.likenum }}
+              </p>
             </div>
-            <div class="heartbox">
-              <img src="../assets/img/index/喜欢-空白.png" alt="" id="heart" />
+            <div class="heartbox" @click.stop="collect(item.id)">
+              <img :src="item.iscollect?iscollect:nocollect" alt="" id="heart" />
             </div>
           </div>
         </div>
@@ -32,9 +34,10 @@
 </template>
 
 <script>
-import { nextTick, onMounted, reactive, toRefs } from "vue";
+import { nextTick, onMounted, reactive, toRefs, ref } from "vue";
 import axiosFoodMsg from "../hook/axiosFoodMsg";
-
+import getAssetsImages from "../hook/getAssetsImages";
+import axios from "axios";
 export default {
   setup() {
     let foodMsgObj = reactive({
@@ -47,23 +50,106 @@ export default {
       3: "肆",
       4: "伍",
     };
+    //初始化并请求图片
     var getfood = () => {
       foodMsgObj.foodMsg = [];
-      axiosFoodMsg().then((res) => {
-        foodMsgObj.foodMsg = res;
-      });
-      let btn = document.getElementsByClassName("el-carousel__button");
-      setTimeout(() => {
-        for (let i = 0; i < btn.length; i++) {
-          btn[i].innerText = wordObj[i];
-        }
-      }, 100);
+      axiosFoodMsg()
+        .then((res) => {
+          foodMsgObj.foodMsg = res;
+        }) //初始化走马灯文字
+        .then(() => {
+          let btn = document.getElementsByClassName("el-carousel__button");
+          for (let i = 0; i < btn.length; i++) {
+            btn[i].innerText = wordObj[i];
+          }
+        });
     };
     getfood();
+    var updateLikeTime = null;
+    var likeInit;
+    var zan = (id) => {
+      let arr = foodMsgObj.foodMsg.filter((item) => {
+        return item.id === id;
+      })[0];
+      //如果是第一次 那么记录初始点赞状态
+      if (!arr.zanfirstClick) {
+        likeInit = arr.islike;
+        arr.zanfirstClick = true;
+      }
+      //点赞和取消点赞
+      if (!arr.islike) {
+        arr.likenum++;
+        arr.islike = 1;
+        clearTimeout(updateLikeTime);
+      } else {
+        arr.likenum--;
+        arr.islike = 0;
+        clearTimeout(updateLikeTime);
+      }
+      //如果最后一次操作和初始状态不一样 才设置定时器发送请求
+      if (likeInit !== arr.islike) {
+        updateLikeTime = setTimeout(() => {
+          let updateData = {
+            userid: sessionStorage.getItem("sid"),
+            id: id,
+            islike: arr.islike,
+          };
+          axios.post("/api/updatelike", updateData).then((res) => {
+            console.log(res);
+            if (res.status === 200) {
+              console.log("点赞转换成功");
+            }
+          });
+        }, 3000);
+      }
+    };
 
+    let collectImg = reactive({
+      iscollect:getAssetsImages("index", "喜欢-点击.png"),
+      nocollect:getAssetsImages("index", "喜欢-空白.png"),
+    })
+    var updateCollectTime = null;
+    var collectInit;
+    var collect = (id) => {
+      let arr = foodMsgObj.foodMsg.filter((item) => {
+        return item.id === id;
+      })[0];
+      //如果是第一次 那么记录初始收藏状态
+      if (!arr.collectfirstClick) {
+        collectInit = arr.iscollect;
+        arr.collectfirstClick = true;
+      }
+      //点赞和取消点赞
+      if (!arr.iscollect) {
+        arr.iscollect = 1;
+        clearTimeout(updateCollectTime);
+      } else {
+        arr.iscollect = 0;
+        clearTimeout(updateCollectTime);
+      }
+      //如果最后一次操作和初始状态不一样 才设置定时器发送请求
+      if (collectInit !== arr.iscollect) {
+        updateCollectTime = setTimeout(() => {
+          let updateData = {
+            userid: sessionStorage.getItem("sid"),
+            id: id,
+            iscollect: arr.iscollect,
+          };
+          axios.post("/api/updatecollect", updateData).then((res) => {
+            console.log(res);
+            if (res.status === 200) {
+              console.log(id+"收藏转换成功");
+            }
+          });
+        }, 3000);
+      }
+    };
     return {
       ...toRefs(foodMsgObj),
+      ...toRefs(collectImg),
       getfood,
+      zan,
+      collect,
     };
   },
 };
@@ -73,6 +159,9 @@ export default {
 .el-carousel {
   width: 100%;
   height: 100%;
+  .is-active {
+    background-color: transparent;
+  }
   .el-carousel__container {
     height: 100% !important;
     .pagin {
@@ -186,6 +275,9 @@ export default {
     bottom: 0 !important;
     right: 0 !important;
     transform: translate(-63%, -495%);
+    .is-active {
+      background-color: red !important;
+    }
   }
 
   li.el-carousel__indicator.el-carousel__indicator--horizontal {
@@ -207,10 +299,6 @@ export default {
       font-weight: 700;
       color: var(--swiperText-color);
     }
-  }
-
-  .is-active {
-    background-color: red !important;
   }
 }
 </style>

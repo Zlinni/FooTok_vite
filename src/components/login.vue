@@ -167,14 +167,15 @@ export default {
           .post("http://localhost:3000/api/register", rawData)
           .then((res) => {
             if (res.data.code === 200) {
-              sessionStorage.setItem("sid", true);
+              console.log(res);
+              sessionStorage.setItem("sid", res.data.data.user.id);
               router.push({ name: "index" });
             }
           })
           .catch((err) => {
             userNameTips.value = "用户名已存在";
             isSuccess.userNameSuccess = false;
-            console.log(err)
+            console.log(err);
           });
       } else {
         e.preventDefault();
@@ -194,10 +195,11 @@ export default {
         .post("http://localhost:3000/api/login", rawData)
         .then((res) => {
           if (res.data.code === 200) {
-            sessionStorage.setItem("sid", true);
+            console.log(res);
+            sessionStorage.setItem("sid", res.data.data.user.id);
             router.push({ name: "index" });
           } else {
-            passwordTips.value = "登陆失败，密码错误"
+            passwordTips.value = "登陆失败，密码错误";
           }
         })
         .catch((err) => {
