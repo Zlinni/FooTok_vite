@@ -21,7 +21,11 @@
               </p>
             </div>
             <div class="heartbox" @click.stop="collect(item.id)">
-              <img :src="item.iscollect?iscollect:nocollect" alt="" id="heart" />
+              <img
+                :src="item.iscollect ? iscollect : nocollect"
+                alt=""
+                id="heart"
+              />
             </div>
           </div>
         </div>
@@ -97,7 +101,8 @@ export default {
           axios.post("/api/updatelike", updateData).then((res) => {
             console.log(res);
             if (res.status === 200) {
-              console.log("点赞转换成功");
+              arr.zanfirstClick = false;
+              console.log(id,"点赞转换成功");
             }
           });
         }, 3000);
@@ -105,9 +110,9 @@ export default {
     };
 
     let collectImg = reactive({
-      iscollect:getAssetsImages("index", "喜欢-点击.png"),
-      nocollect:getAssetsImages("index", "喜欢-空白.png"),
-    })
+      iscollect: getAssetsImages("index", "喜欢-点击.png"),
+      nocollect: getAssetsImages("index", "喜欢-空白.png"),
+    });
     var updateCollectTime = null;
     var collectInit;
     var collect = (id) => {
@@ -138,7 +143,8 @@ export default {
           axios.post("/api/updatecollect", updateData).then((res) => {
             console.log(res);
             if (res.status === 200) {
-              console.log(id+"收藏转换成功");
+              arr.collectfirstClick = true;
+              console.log(id,"收藏转换成功");
             }
           });
         }, 3000);
@@ -191,21 +197,20 @@ export default {
       position: absolute;
       right: 0;
       bottom: 0;
-      transform: translate(-153%, -45%);
+      transform: translate(-100%, -45%);
       z-index: 10;
       display: flex;
       justify-content: center;
       align-items: flex-start;
       flex-direction: column;
-      width: 36%;
+      width: 45%;
       .foodbox {
         display: flex;
         width: 100%;
         #food_name {
           display: flex;
-          justify-content: center;
+          justify-content: start;
           align-items: center;
-          width: 380px;
           padding: 9px;
           font-size: 75px;
           letter-spacing: 10px;
@@ -233,8 +238,9 @@ export default {
               position: absolute;
               left: 50%;
               top: 50%;
-              transform: translate(-15%, -50%);
+              transform: translate(10%, -50%);
               font-size: 20px;
+              font-weight: 700;
             }
           }
           .heartbox {

@@ -19,7 +19,7 @@ export default defineConfig({
         //反向代理配置，注意rewrite写法，开始没看文档在这里踩了坑
         proxy: {
                 '/api': {
-                    target:'http://5auyj5.natappfree.cc',
+                    target:'http://h3bsf3.natappfree.cc',
                     changeOrigin: true,
                     rewrite: (path) => path.replace(/^\/api/, '')
               }
