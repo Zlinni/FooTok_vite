@@ -1,9 +1,11 @@
 <template>
-  <el-aside class="pre_box" >
+  <el-aside class="pre_box">
     <template v-if="isLeft">
       <div v-for="(n, index) in nav" :key="index" class="nav">
-        <router-link :to="n.link">{{ n.text }}</router-link
-        ><img :src="n.imgUrl" alt="" />
+        <div class="linkBox">
+          <router-link :to="n.link">{{ n.text }}</router-link
+          ><img :src="n.imgUrl" alt="" />
+        </div>
       </div>
     </template>
     <template v-else>
@@ -31,7 +33,7 @@ export default {
         imgUrl: getAssetsImages("decoration", "蒸糕.png"),
       },
       {
-        text: "美食榜单",
+        text: "美食分享",
         link: "/home/hotList",
         imgUrl: getAssetsImages("decoration", "米饭.png"),
       },
@@ -76,19 +78,20 @@ export default {
     height: 9vw;
     border-radius: 70px;
     background-color: var(--asideBg-color);
-    a {
-      margin-left: 20%;
-      display: none;
-      width: 80%;
-      height: 100%;
-      text-align: center;
-      line-height: 300%;
-      overflow: hidden;
-      font-size: 50px;
-      white-space: nowrap;
-    }
-    img{
-      width: 100%;
+    .linkBox {
+      display: flex;
+      align-items: center;
+      a {
+        width: 100%;
+        text-align: center;
+        line-height: 100%;
+        overflow: hidden;
+        font-size: 50px;
+        white-space: nowrap;
+      }
+      img {
+        width: 100%;
+      }
     }
   }
   @keyframes widthMove {
@@ -112,11 +115,11 @@ export default {
       transform: rotate(360deg);
     }
   }
-  .nav:hover img {
+  .nav:hover .linkBox img {
     width: 25%;
     animation: imgmov 1s linear;
   }
-  .nav:hover a {
+  .nav:hover .linkBox a {
     display: block;
     transition: all 2s;
   }

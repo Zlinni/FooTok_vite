@@ -15,27 +15,29 @@
         </el-col>
         <el-col :sm="10" :md="7"></el-col>
         <el-col :sm="10" :md="7">
-          <form class="search_box" method="GET" action="/searchResult">
-            <input
-              type="text"
-              name="keyword"
+          <div class="searchBox">
+            <el-autocomplete
               class="search_text"
-              placeholder="Type to search"
-            />
-            <button id="searchbtn">
-              <i class="iconfont icon-meishi"></i>
-            </button>
-          </form>
+              v-model="state"
+              :fetch-suggestions="querySearchAsync"
+              placeholder="Please input"
+              @select="handleSelect"
+            >
+              <template #suffix>
+                <i class="iconfont icon-meishi"></i>
+              </template>
+            </el-autocomplete>
+          </div>
           <ul class="user_box">
             <li class="loginplace">
               <router-link to="/login">login</router-link>
             </li>
-          </ul> 
+          </ul>
         </el-col>
       </el-row>
       <el-container>
         <indexAside :isLeft="true"></indexAside>
-        <el-main> 
+        <el-main>
           <router-view></router-view>
         </el-main>
         <indexAside></indexAside>
@@ -46,9 +48,10 @@
 
 <script>
 import { calendar } from "../plugins/calendar";
-import { onMounted, reactive, toRefs } from "vue";
+import { onMounted, reactive, toRefs, ref } from "vue";
 import indexAside from "../components/indexAside.vue";
-import getAssetsImages from '../hook/getAssetsImages'
+import getAssetsImages from "../hook/getAssetsImages";
+import axios from "axios";
 export default {
   name: "mainFrame",
   components: {
@@ -61,9 +64,51 @@ export default {
       day: "",
     });
     const imgUrl = reactive({
-      logo: getAssetsImages("index","斜眼看.png"),
-      indexBg: getAssetsImages("index","indexBg.jpg"),
+      logo: getAssetsImages("index", "斜眼看.png"),
+      indexBg: getAssetsImages("index", "indexBg.jpg"),
     });
+    let state = ref("");
+    let foodObj = reactive({
+      foodItem: [],
+    });
+    const handleSelect = (val) => {
+      console.log(val.id);
+      axios
+        .get("/api/search", {
+          params: {
+            id: val.id,
+          },
+        })
+        .then((res) => {
+          let result = res.data;
+          if (result.code === 200) {
+          }
+        });
+    };
+    function querySearchAsync(queryString, cb) {
+      console.log("svalue", state.value);
+      console.log("qs", queryString);
+      axios
+        .get("/api/simplesearch", {
+          params: {
+            foodname: queryString,
+          },
+        })
+        .then((res) => {
+          let result = res.data;
+          console.log(result);
+          if (result.code === 200) {
+            for (let i of result.data) {
+              i.value = i.foodname;
+            }
+            console.log("result.data", result.data);
+            cb(result.data);
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    }
     onMounted(() => {
       //初始化农历
       var date = new Date();
@@ -76,34 +121,17 @@ export default {
       calendarData.day = cal.IDayCn;
     });
     return {
+      state,
+      handleSelect,
+      querySearchAsync,
       ...toRefs(imgUrl),
       ...toRefs(calendarData),
+      ...toRefs(foodObj),
     };
   },
 };
 </script>
-<style lang="less">
-:root {
-  // 框架
-  --frameBg-color: #bdc3c7;
-  --header-color: #ecf0f1;
-  --buttonBackground-color: #fff;
-  --buttonBorder-color: rgba(246, 179, 127);
-  // 侧栏
-  --asideBg-color:#ecf0f1;
-  // 登陆页面
-  --loginBg-color:#e0e0e0;
-  --interfaceBg-color:rgba(255, 255, 255, 0.9);
-  --active-color:black;
-  --tips-color:red;
-  --icon-color:rgb(19, 190, 19);
-  --input-color:white;
-  --submit-border:rgba(69, 69, 69, 0.3);
-  --submitBg-color:rgba(255, 255, 255, 0.7);
-  // swiper
-  --swiperBtnBg-color:#ecf0f1;
-  --swiperText-color:#666;
-}
+<style lang="less" scoped>
 .frame {
   position: absolute;
   left: 0;
@@ -137,33 +165,35 @@ export default {
         display: flex;
         p {
           margin: 0 5px;
-          font-size: 1.2rem;
+          font-size: 1rem;
           white-space: nowrap;
           cursor: default;
         }
       }
-      .search_box {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
+      .searchBox {
+        position: relative;
         width: 100%;
         height: 100%;
-        min-height: 40px;
-        margin-right: 20px;
-        background: var(--buttonBackground-color);
-        border-radius: 40px;
-        border: var(--buttonBorder-color) solid 1px;
-        box-shadow: 1px 1px 1px var(--buttonBorder-color);
         .search_text {
-          padding-left: 10px;
-          background: none;
-          border: none;
+          padding-left: 5%;
+          padding-right: 5%;
+          width: 100%;
+          height: 100%;
+          min-height: 40px;
+          margin-right: 20px;
+          background: var(--buttonBackground-color);
+          border-radius: 40px;
+          border: var(--buttonBorder-color) solid 1px;
+          box-shadow: 1px 1px 1px var(--buttonBorder-color);
         }
         #searchbtn {
-          padding-right: 10px;
-          background: none;
+          position: absolute;
+          right: 0;
+          top: 0;
+          transform: translate(-90%, 20%);
         }
       }
+
       .user_box {
         width: 100%;
         display: flex;
@@ -175,7 +205,7 @@ export default {
           height: 100%;
           a {
             margin: 0 25px;
-            font-size: 1.2rem;
+            font-size: 1rem;
             text-transform: uppercase;
           }
         }
@@ -185,9 +215,12 @@ export default {
       position: relative;
       top: 12%;
       height: 90%;
-      .el-main{
+      .el-main {
         padding-top: 0;
         padding-bottom: 0;
+      }
+      .el-main::-webkit-scrollbar {
+        display: none;
       }
     }
   }

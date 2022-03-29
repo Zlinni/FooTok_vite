@@ -4,7 +4,7 @@
       <span><a id="change" @click="getfood">换一些</a></span>
     </div>
     <el-carousel-item v-for="item in foodMsg" :key="item.id">
-      <img v-lazy="item.foodbigimg" alt="" />
+      <img :src="item.foodbigimg" alt="" />
       <div class="cover">
         <div class="foodbox">
           <span id="food_name" class="food_name">{{ item.foodname }}</span>
@@ -21,7 +21,7 @@
               </p>
             </div>
             <div class="heartbox" @click.stop="collect(item.id)">
-              <img
+              <el-image
                 :src="item.iscollect ? iscollect : nocollect"
                 alt=""
                 id="heart"
@@ -62,6 +62,7 @@ export default {
           foodMsgObj.foodMsg = res;
         }) //初始化走马灯文字
         .then(() => {
+          console.log('initword')
           let btn = document.getElementsByClassName("el-carousel__button");
           for (let i = 0; i < btn.length; i++) {
             btn[i].innerText = wordObj[i];
@@ -102,7 +103,7 @@ export default {
             console.log(res);
             if (res.status === 200) {
               arr.zanfirstClick = false;
-              console.log(id,"点赞转换成功");
+              console.log(id, "点赞转换成功");
             }
           });
         }, 3000);
@@ -144,7 +145,7 @@ export default {
             console.log(res);
             if (res.status === 200) {
               arr.collectfirstClick = true;
-              console.log(id,"收藏转换成功");
+              console.log(id, "收藏转换成功");
             }
           });
         }, 3000);
@@ -189,7 +190,7 @@ export default {
         cursor: pointer;
       }
     }
-    img {
+    .img {
       width: 100%;
       height: 100%;
     }
@@ -275,7 +276,6 @@ export default {
       }
     }
   }
-
   .el-carousel__indicators--horizontal {
     left: unset !important;
     bottom: 0 !important;

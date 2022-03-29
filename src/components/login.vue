@@ -7,10 +7,10 @@
       <!-- 登录 或者 注册 的选择盒子 -->
       <div class="choiceBox">
         <div class="loginBox">
-          <p @click="isLogin = true" :class="{ active: isLogin }">登陆</p>
+          <p @click="init(true)" :class="{ active: isLogin }">登陆</p>
         </div>
         <div class="registerBox">
-          <p @click="isLogin = false" :class="{ active: !isLogin }">注册</p>
+          <p @click="init(false)" :class="{ active: !isLogin }">注册</p>
         </div>
       </div>
       <!-- 登录界面 -->
@@ -27,6 +27,7 @@
               v-model="username"
               autocomplete
             />
+            <p class="tips">{{ loginTips.userNameTips }}</p>
           </div>
           <div class="passwordBox">
             <img :src="keyimg" alt="" />
@@ -39,6 +40,7 @@
               v-model="password"
               autocomplete
             />
+            <p class="tips">{{ loginTips.passwordTips }}</p>
           </div>
           <button id="submit" @click="userLogin">进入</button>
         </div>
@@ -54,7 +56,7 @@
               v-model="username"
             />
             <i class="iconfont icon-chenggong" v-show="userNameSuccess"></i>
-            <p class="tips">{{ userNameTips }}</p>
+            <p class="tips">{{ resgisterTips.userNameTips }}</p>
           </div>
           <div class="passwordBox">
             <img :src="keyimg" alt="" />
@@ -68,7 +70,7 @@
               @keydown="showcommitpsw = true"
             />
             <i class="iconfont icon-chenggong" v-show="passWordSuccess"></i>
-            <p class="tips">{{ passwordTips }}</p>
+            <p class="tips">{{ resgisterTips.passwordTips }}</p>
           </div>
           <div class="passwordBox" v-if="showcommitpsw">
             <img :src="keyimg" alt="" />
@@ -81,9 +83,9 @@
               v-model="commitpsw"
             />
             <i class="iconfont icon-chenggong" v-show="commitpswSuccess"></i>
-            <p class="tips">{{ commitpswTips }}</p>
+            <p class="tips">{{ resgisterTips.commitpswTips }}</p>
           </div>
-          <button id="submit" @click.native="userRegister">进入</button>
+          <button id="submit" @click="userRegister">进入</button>
         </div>
       </div>
     </div>
@@ -109,26 +111,34 @@ export default {
     });
     let isLogin = ref(true);
     let commitpsw = ref("");
-    let userNameTips = ref("");
-    let passwordTips = ref("");
-    let commitpswTips = ref("");
     let showcommitpsw = ref(false);
+    let resgisterTips = reactive({
+      userNameTips: "",
+      passwordTips: "",
+      commitpswTips: "",
+    });
+    let loginTips = reactive({
+      userNameTips: "",
+      passwordTips: "",
+    });
     let isSuccess = reactive({
       userNameSuccess: false,
       passWordSuccess: false,
       commitpswSuccess: false,
     });
-    const route = useRoute();
     const router = useRouter();
+    function init(islogin) {
+      isLogin.value = islogin;
+    }
     watch(
       () => userData.username,
       (newValue) => {
         let patt = /^[a-zA-Z0-9_-]{4,16}$/;
         if (!patt.test(newValue)) {
-          userNameTips.value = "支持字母，数字，下划线，减号";
+          resgisterTips.userNameTips = "支持字母，数字，下划线，减号";
           isSuccess.userNameSuccess = false;
         } else {
-          userNameTips.value = "";
+          resgisterTips.userNameTips = "";
           isSuccess.userNameSuccess = true;
         }
       }
@@ -138,10 +148,10 @@ export default {
       (newValue) => {
         let patt = /^.*(?=.{6,})(?=.*\d)(?=.*[A-Z])(?=.*[a-z]).*$/;
         if (!patt.test(newValue)) {
-          passwordTips.value = "您的密码强度不够";
+          resgisterTips.passwordTips = "您的密码强度不够";
           isSuccess.passWordSuccess = false;
         } else {
-          passwordTips.value = "";
+          resgisterTips.passwordTips = "";
           isSuccess.passWordSuccess = true;
         }
       }
@@ -149,10 +159,10 @@ export default {
     watch(commitpsw, (newValue) => {
       if (newValue === userData.password && isSuccess.passWordSuccess) {
         isSuccess.commitpswSuccess = true;
-        commitpswTips.value = "";
+        resgisterTips.commitpswTips = "";
       } else {
         isSuccess.commitpswSuccess = false;
-        commitpswTips.value = "您的密码不匹配";
+        resgisterTips.commitpswTips = "您的密码不匹配";
       }
     });
     //注册
@@ -163,27 +173,30 @@ export default {
         isSuccess.commitpswSuccess
       ) {
         let rawData = toRaw(userData);
+        console.log(rawData);
         axios
-          .post("http://localhost:3000/api/register", rawData)
+          .post("/api/register", rawData)
           .then((res) => {
-            if (res.data.code === 200) {
-              console.log(res);
-              sessionStorage.setItem("sid", res.data.data.user.id);
-              router.push({ name: "index" });
+            let result = res.data;
+            if (result.code === 200) {
+              isLogin.value = true;
+            } else {
+              resgisterTips.userNameTips = "用户名已存在";
+              isSuccess.userNameSuccess = false;
             }
           })
           .catch((err) => {
-            userNameTips.value = "用户名已存在";
+            resgisterTips.userNameTips = "用户名已存在";
             isSuccess.userNameSuccess = false;
             console.log(err);
           });
       } else {
         e.preventDefault();
         if (!userData.username) {
-          userNameTips.value = "用户名不能为空";
+          resgisterTips.userNameTips = "用户名不能为空";
         }
         if (!userData.password) {
-          passwordTips.value = "密码不能为空";
+          resgisterTips.passwordTips = "密码不能为空";
         }
       }
     };
@@ -192,26 +205,43 @@ export default {
     var userLogin = () => {
       let rawData = toRaw(userData);
       axios
-        .post("http://localhost:3000/api/login", rawData)
+        .post("/api/login", rawData)
         .then((res) => {
-          if (res.data.code === 200) {
-            console.log(res);
-            sessionStorage.setItem("sid", res.data.data.user.id);
+          let result = res.data;
+          // spring;
+          // if (result.code === 200) {
+          //   console.log(res);
+          //   sessionStorage.setItem("sid", result.data.user.id);
+          //   router.push({ name: "index" });
+          // } else {
+          //   loginTips.userNameTips = "";
+          //   passwordTips.value = "登陆失败，密码错误";
+          // }
+          // node
+          if (result.code === 200) {
+            sessionStorage.setItem("sid", result.data.id);
             router.push({ name: "index" });
-          } else {
-            passwordTips.value = "登陆失败，密码错误";
+          } else if (result.code === 101) {
+            if (result.msg === "get_fail") {
+              loginTips.userNameTips = "";
+              loginTips.passwordTips = "登陆失败，密码错误";
+            } else {
+              loginTips.passwordTips = "";
+              loginTips.userNameTips = "该用户不存在";
+            }
           }
         })
         .catch((err) => {
           console.log("用户不存在");
-          userNameTips.value = "该用户不存在";
+          passwordTips.value = "";
+          loginTips.userNameTips = "该用户不存在";
         });
     };
     return {
       isLogin,
-      userNameTips,
-      passwordTips,
-      commitpswTips,
+      init,
+      resgisterTips,
+      loginTips,
       commitpsw,
       showcommitpsw,
       userRegister,

@@ -3,7 +3,7 @@ import {
     createWebHashHistory
 } from "vue-router"
 const swiper = () => import('../components/foodSwiper.vue')
-const hotList = () => import('../components/foodHotlist.vue')
+const hotList = () => import('../components/foodMake.vue')
 const category = () => import('../components/foodCategory.vue')
 const map = () => import('../components/foodMap.vue')
 const personality = () => import('../components/foodPerson.vue')
